@@ -12,7 +12,7 @@ import (
 
 type UtilError string
 
-func (err UtilError) Error() string { return "Redis Error: " + string(err) }
+func (err UtilError) Error() string { return "Utils Error: " + string(err) }
 
 func ProcessName() string {
 	file := os.Args[0]
