@@ -88,6 +88,12 @@ func ExecProcess(background bool, file string, args ...string) (int, error) {
 	return -1, err
 }
 
+func TryToRunAsDaemon(key string) {
+	for _,arg := range(os.Args){
+		arg.
+	}
+}
+
 func StartProcess(background bool, file string, args []string) (*os.Process, error) {
 	filePath, _ := filepath.Abs(file)
 	if background {
