@@ -60,10 +60,11 @@ func CheckWritePidPermission(pidFile string) error {
 	if len(pidFile) <= 0 {
 		pidFile = DefaultPidFileName()
 	}
-	if err := ioutil.WriteFile(pidFile, []byte(fmt.Sprintf("%d", 0)), 0644); err != nil {
-		fmt.Sprintln("had no permission to write pid file: ", pidFile, err)
-		return UtilError("sdfdsf")
+	file := pidFile + ".tmp"
+	if err := ioutil.WriteFile(file, []byte(fmt.Sprintf("%d", 0)), 0644); err != nil {
+		return UtilError("had no permission to write pid file")
 	}
+	os.Remove(file)
 	return nil
 }
 
