@@ -1,4 +1,4 @@
-package kutils
+package kutil
 
 import (
 	"fmt"
