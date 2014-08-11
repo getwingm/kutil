@@ -41,6 +41,17 @@ func DefaultPidFileName() string {
 	return pidFile
 }
 
+func ProcessFile() string {
+	file, _ := exec.LookPath(os.Args[0])
+	path, _ := filepath.Abs(file)
+	return path
+}
+
+func ProcessPath() string {
+	path := filepath.Dir(ProcessFile())
+	return path
+}
+
 func WritePidFile(myFile string, pid int) (err error) {
 	return ioutil.WriteFile(myFile, []byte(fmt.Sprintf("%d", pid)), 0644)
 }
@@ -56,7 +67,8 @@ func CheckWritePidPermission(pidFile string) error {
 	return nil
 }
 
-func CreateProcess(background bool, file string, args []string) error {
+func ExecProcess(background bool, file string, args ...string) (int, error) {
+	fmt.Println("args:", args, "-Len:", len(args))
 	filePath, _ := filepath.Abs(file)
 	cmd := exec.Command(filePath, args...)
 	if background {
@@ -68,10 +80,14 @@ func CreateProcess(background bool, file string, args []string) error {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
-	return cmd.Start()
+	err := cmd.Start()
+	if err == nil {
+		return cmd.Process.Pid, nil
+	}
+	return -1, err
 }
 
-func CreateProcess2(background bool, file string, args []string) (*os.Process, error) {
+func StartProcess(background bool, file string, args []string) (*os.Process, error) {
 	filePath, _ := filepath.Abs(file)
 	if background {
 		return os.StartProcess(filePath, args, &os.ProcAttr{Files: []*os.File{nil, nil, nil}})
