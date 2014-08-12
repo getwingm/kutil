@@ -4,45 +4,23 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"os/signal"
 	"text/template"
 )
 
 const (
-	initSystemV = initFlavor(iota)
-	initUpstart
-	initSystemd
+	SystemV = 1
+	Upstart = 2
+	Systemd = 3
 )
 
 type LinuxService struct {
-	flavor                         initFlavor
+	itype                          int
 	name, displayName, description string
 	exePath                        string
 }
 
-type initFlavor uint8
-
-func getFlavor() initFlavor {
-	flavor := initSystemV
-	if isUpstart() {
-		flavor = initUpstart
-	}
-	if isSystemd() {
-		flavor = initSystemd
-	}
-	return flavor
-}
-
-func newService(name, displayName, description, exePath string) (*LinuxService, error) {
-	s := &LinuxService{
-		flavor:      getFlavor(),
-		name:        name,
-		displayName: displayName,
-		description: description,
-		exePath:     exePath,
-	}
-
-	return s, nil
+func NewService(itype int, name, displayName, desc, exePath string) *LinuxService {
+	return &LinuxService{itype, name, displayName, desc, exePath}
 }
 
 func isUpstart() bool {
@@ -59,47 +37,44 @@ func isSystemd() bool {
 	return false
 }
 
-func (f initFlavor) String() string {
-	switch f {
-	case initSystemV:
-		return "System-V"
-	case initUpstart:
-		return "Upstart"
-	case initSystemd:
-		return "systemd"
-	default:
-		return "unknown"
+func SupportInitType(itype int) bool {
+	if itype == SystemV {
+		return true
 	}
+	if itype == Upstart {
+		return isUpstart()
+	}
+	if itype == Systemd {
+		return isSystemd()
+	}
+	return false
 }
 
-func (f initFlavor) ConfigPath(name string) string {
-	switch f {
-	case initSystemV:
+func GetPreferInitType() int {
+	if isSystemd() {
+		return Systemd
+	}
+	if isUpstart() {
+		return Upstart
+	}
+	return SystemV
+}
+
+func configPath(itype int, name string) string {
+	switch itype {
+	case SystemV:
 		return "/etc/init.d/" + name
-	case initUpstart:
+	case Upstart:
 		return "/etc/init/" + name + ".conf"
-	case initSystemd:
+	case Systemd:
 		return "/etc/systemd/system/" + name + ".service"
 	default:
 		return ""
 	}
 }
 
-func (f initFlavor) GetTemplate() *template.Template {
-	var templ string
-	switch f {
-	case initSystemV:
-		templ = systemVScript
-	case initUpstart:
-		templ = upstartScript
-	case initSystemd:
-		templ = systemdScript
-	}
-	return template.Must(template.New(f.String() + "Script").Parse(templ))
-}
-
 func (s *LinuxService) Install() error {
-	confPath := s.flavor.ConfigPath(s.name)
+	confPath := configPath(s.itype, s.name)
 	_, err := os.Stat(confPath)
 	if err == nil {
 		return fmt.Errorf("Init already exists: %s", confPath)
@@ -123,12 +98,22 @@ func (s *LinuxService) Install() error {
 		path,
 	}
 
-	err = s.flavor.GetTemplate().Execute(f, to)
+	var templ string
+	switch s.itype {
+	case SystemV:
+		templ = systemVScript
+	case Upstart:
+		templ = upstartScript
+	case Systemd:
+		templ = systemdScript
+	}
+	mytemp := template.Must(template.New("Script").Parse(templ))
+	err = mytemp.Execute(f, to)
 	if err != nil {
 		return err
 	}
 
-	if s.flavor == initSystemV {
+	if s.itype == SystemV {
 		if err = os.Chmod(confPath, 0755); err != nil {
 			return err
 		}
@@ -144,7 +129,7 @@ func (s *LinuxService) Install() error {
 		}
 	}
 
-	if s.flavor == initSystemd {
+	if s.itype == Systemd {
 		return exec.Command("systemctl", "daemon-reload").Run()
 	}
 
@@ -152,61 +137,33 @@ func (s *LinuxService) Install() error {
 }
 
 func (s *LinuxService) Remove() error {
-	if s.flavor == initSystemd {
+	if s.itype == Systemd {
 		exec.Command("systemctl", "disable", s.name+".service").Run()
 	}
-	if err := os.Remove(s.flavor.ConfigPath(s.name)); err != nil {
+	if err := os.Remove(configPath(s.itype, s.name)); err != nil {
 		return err
 	}
-	return nil
-}
-
-func (s *LinuxService) Run(onStart, onStop func() error) (err error) {
-	err = onStart()
-	if err != nil {
-		return err
-	}
-	defer func() {
-		err = onStop()
-	}()
-
-	sigChan := make(chan os.Signal, 3)
-
-	signal.Notify(sigChan, os.Interrupt, os.Kill)
-
-	<-sigChan
-
 	return nil
 }
 
 func (s *LinuxService) Start() error {
-	if s.flavor == initUpstart {
+	if s.itype == Upstart {
 		return exec.Command("initctl", "start", s.name).Run()
 	}
-	if s.flavor == initSystemd {
+	if s.itype == Systemd {
 		return exec.Command("systemctl", "start", s.name+".service").Run()
 	}
 	return exec.Command("service", s.name, "start").Run()
 }
 
 func (s *LinuxService) Stop() error {
-	if s.flavor == initUpstart {
+	if s.itype == Upstart {
 		return exec.Command("initctl", "stop", s.name).Run()
 	}
-	if s.flavor == initSystemd {
+	if s.itype == Systemd {
 		return exec.Command("systemctl", "stop", s.name+".service").Run()
 	}
 	return exec.Command("service", s.name, "stop").Run()
-}
-
-func (s *LinuxService) Error(format string, a ...interface{}) error {
-	return nil
-}
-func (s *LinuxService) Warning(format string, a ...interface{}) error {
-	return nil
-}
-func (s *LinuxService) Info(format string, a ...interface{}) error {
-	return nil
 }
 
 const systemVScript = `#!/bin/sh
