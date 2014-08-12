@@ -88,7 +88,7 @@ func ExecProcess(background bool, file string, args ...string) (int, error) {
 	return -1, err
 }
 
-func TryToRunAsDaemon(key string) (int, error) {
+func TryToRunAsDaemon(key, pidFile string) int {
 	key = strings.ToLower(key)
 	var argsNew []string
 	var bFind bool = false
@@ -101,15 +101,15 @@ func TryToRunAsDaemon(key string) (int, error) {
 		}
 	}
 	if bFind {
-		if err := CheckWritePidPermission(DefaultPidFileName()); err != nil {
-			return -1, UtilError("has no permission to write pid file")
+		if err := CheckWritePidPermission(pidFile); err != nil {
+			return -1
 		}
 		if pid, err := ExecProcess(true, ProcessFile(), argsNew...); err == nil {
-			return pid, nil
+			return pid
 		}
-		return -2, UtilError("failed to execute pid file")
+		return -2
 	}
-	return 0, nil
+	return 0
 }
 
 func StartProcess(background bool, file string, args []string) (*os.Process, error) {
