@@ -92,12 +92,12 @@ func (s *LinuxService) Install() error {
 		Display     string
 		Description string
 		Path        string
-		Name		string
+		Name        string
 	}{
 		s.displayName,
 		s.description,
 		path,
-		s.name
+		s.name,
 	}
 
 	var templ string
