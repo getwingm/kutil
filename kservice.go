@@ -92,10 +92,12 @@ func (s *LinuxService) Install() error {
 		Display     string
 		Description string
 		Path        string
+		Name		string
 	}{
 		s.displayName,
 		s.description,
 		path,
+		s.name
 	}
 
 	var templ string
@@ -184,7 +186,7 @@ const systemVScript = `#!/bin/sh
 
 cmd="{{.Path}}"
 
-name=$(basename $0)
+name="{{.Name}}"
 pid_file="/var/run/$name.pid"
 stdout_log="/var/log/$name.log"
 stderr_log="/var/log/$name.err"
