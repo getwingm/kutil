@@ -19,8 +19,8 @@ type LinuxService struct {
 	exePath                        string
 }
 
-func NewService(itype int, name, displayName, desc, exePath string) *LinuxService {
-	return &LinuxService{itype, name, displayName, desc, exePath}
+func NewService(itype int, name, desc, exePath string) *LinuxService {
+	return &LinuxService{itype, name, fmt.Sprintf("%v service", name), desc, exePath}
 }
 
 func isUpstart() bool {
