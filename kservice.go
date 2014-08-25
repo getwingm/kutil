@@ -246,6 +246,16 @@ case "$1" in
             exit 1
         fi
         $0 start
+    ;;	
+  	reload)
+	    if test -s "$pid_file" ; then
+	      read mypid < "$pid_file"
+	      kill -HUP $mypid && echo "Reloading $name service"
+	      touch "$pid_file"
+	    else
+	      echo "$name's PID file could not be found!"
+	      exit 1
+	    fi
     ;;
     status)
         if is_running; then
@@ -256,7 +266,7 @@ case "$1" in
         fi
     ;;
     *)
-    echo "Usage: $0 {start|stop|restart|status}"
+    echo "Usage: $0 {start|stop|restart|reload|status}"
     exit 1
     ;;
 esac
