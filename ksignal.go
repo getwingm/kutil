@@ -23,25 +23,13 @@ const (
 	GORTERM = syscall.Signal(0xf)
 )
 
-type SignalProc func(os.Signal, ...interface{}) bool
+type SignalNofity chan os.Signal
 
-func WaitForSignalEx(spfn SignalProc, p ...interface{}) {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, FORHUP, FORINT, FORQUIT, FORILL, FORTRAP, FORABRT, FORBUS, FORFPE, FORKILL, FORSEGV, FORPIPE, FORALRM, GORTERM)
-	bLoop := true
-	for bLoop {
-		s := <-c
-		bLoop = spfn(s, p...)
+func (sn *SignalNofity) Wait() os.Signal {
+	if *sn == nil {
+		*sn = make(chan os.Signal, 1)
+		signal.Notify(*sn, FORHUP, FORINT, FORQUIT, FORILL, FORTRAP, FORABRT, FORBUS, FORFPE, FORKILL, FORSEGV, FORPIPE, FORALRM, GORTERM)
 	}
-}
-
-var sc chan os.Signal
-
-func WaitForSignal() os.Signal {
-	if sc == nil {
-		sc = make(chan os.Signal, 1)
-		signal.Notify(sc, FORHUP, FORINT, FORQUIT, FORILL, FORTRAP, FORABRT, FORBUS, FORFPE, FORKILL, FORSEGV, FORPIPE, FORALRM, GORTERM)
-	}
-	s := <-sc
+	s := <-*sn
 	return s
 }
