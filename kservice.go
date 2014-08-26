@@ -13,14 +13,14 @@ const (
 	Systemd = 3
 )
 
-type LinuxService struct {
+type KService struct {
 	itype                          int
 	name, displayName, description string
 	exePath                        string
 }
 
-func NewService(itype int, name, desc, exePath string) *LinuxService {
-	return &LinuxService{itype, name, fmt.Sprintf("%v service", name), desc, exePath}
+func NewService(itype int, name, desc, exePath string) *KService {
+	return &KService{itype, name, fmt.Sprintf("%v service", name), desc, exePath}
 }
 
 func isUpstart() bool {
@@ -73,7 +73,7 @@ func configPath(itype int, name string) string {
 	}
 }
 
-func (s *LinuxService) Install() error {
+func (s *KService) Install() error {
 	confPath := configPath(s.itype, s.name)
 	_, err := os.Stat(confPath)
 	if err == nil {
@@ -138,7 +138,7 @@ func (s *LinuxService) Install() error {
 	return nil
 }
 
-func (s *LinuxService) Remove() error {
+func (s *KService) Remove() error {
 	if s.itype == Systemd {
 		exec.Command("systemctl", "disable", s.name+".service").Run()
 	}
@@ -148,7 +148,7 @@ func (s *LinuxService) Remove() error {
 	return nil
 }
 
-func (s *LinuxService) Start() error {
+func (s *KService) Start() error {
 	if s.itype == Upstart {
 		return exec.Command("initctl", "start", s.name).Run()
 	}
@@ -158,7 +158,7 @@ func (s *LinuxService) Start() error {
 	return exec.Command("service", s.name, "start").Run()
 }
 
-func (s *LinuxService) Stop() error {
+func (s *KService) Stop() error {
 	if s.itype == Upstart {
 		return exec.Command("initctl", "stop", s.name).Run()
 	}

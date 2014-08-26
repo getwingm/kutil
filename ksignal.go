@@ -23,13 +23,13 @@ const (
 	GORTERM = syscall.Signal(0xf)
 )
 
-type SignalNofity chan os.Signal
+type KSignal chan os.Signal
 
-func (sn *SignalNofity) Wait() os.Signal {
-	if *sn == nil {
-		*sn = make(chan os.Signal, 1)
-		signal.Notify(*sn, FORHUP, FORINT, FORQUIT, FORILL, FORTRAP, FORABRT, FORBUS, FORFPE, FORKILL, FORSEGV, FORPIPE, FORALRM, GORTERM)
+func (k *KSignal) Wait() os.Signal {
+	if *k == nil {
+		*k = make(chan os.Signal, 1)
+		signal.Notify(*k, FORHUP, FORINT, FORQUIT, FORILL, FORTRAP, FORABRT, FORBUS, FORFPE, FORKILL, FORSEGV, FORPIPE, FORALRM, GORTERM)
 	}
-	s := <-*sn
+	s := <-*k
 	return s
 }
