@@ -10,7 +10,7 @@ type KEvent struct {
 
 func (k *KEvent) init() {
 	if k.ch == nil {
-		k.ch = make(chan int, 1)
+		k.ch = make(chan int)
 	}
 }
 
