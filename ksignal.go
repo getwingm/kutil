@@ -27,7 +27,7 @@ type KSignal chan os.Signal
 
 func (k *KSignal) Wait() os.Signal {
 	if *k == nil {
-		*k = make(chan os.Signal)
+		*k = make(chan os.Signal, 1)
 		signal.Notify(*k, FORHUP, FORINT, FORQUIT, FORILL, FORTRAP, FORABRT, FORBUS, FORFPE, FORKILL, FORSEGV, FORPIPE, FORALRM, FORTERM)
 	}
 	s := <-*k
