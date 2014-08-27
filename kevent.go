@@ -39,3 +39,9 @@ func (k *KEvent) Post(v int) {
 	}
 	k.ch <- v
 }
+
+func (k *KEvent) Close() {
+	if k.ch != nil {
+		close(k.ch)
+	}
+}

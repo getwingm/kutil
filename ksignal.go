@@ -20,7 +20,7 @@ const (
 	FORSEGV = syscall.Signal(0xb)
 	FORPIPE = syscall.Signal(0xd)
 	FORALRM = syscall.Signal(0xe)
-	GORTERM = syscall.Signal(0xf)
+	FORTERM = syscall.Signal(0xf)
 )
 
 type KSignal chan os.Signal
@@ -28,8 +28,15 @@ type KSignal chan os.Signal
 func (k *KSignal) Wait() os.Signal {
 	if *k == nil {
 		*k = make(chan os.Signal, 1)
-		signal.Notify(*k, FORHUP, FORINT, FORQUIT, FORILL, FORTRAP, FORABRT, FORBUS, FORFPE, FORKILL, FORSEGV, FORPIPE, FORALRM, GORTERM)
+		signal.Notify(*k, FORHUP, FORINT, FORQUIT, FORILL, FORTRAP, FORABRT, FORBUS, FORFPE, FORKILL, FORSEGV, FORPIPE, FORALRM, FORTERM)
 	}
 	s := <-*k
 	return s
+}
+
+func (k *KSignal) Close() {
+	if *k != nil {
+		close(*k)
+		*k = nil
+	}
 }
