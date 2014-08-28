@@ -15,15 +15,17 @@ type KLog struct {
 	wr      io.Writer
 	day     string
 
-	prefix string
-	path   string
-	name   string
+	prefix  string
+	path    string
+	name    string
+	bstdout bool
 }
 
-func (k *KLog) New(path string, name string, prefix string) (err error) {
+func (k *KLog) New(path string, name string, prefix string, bstdout bool) (err error) {
 	k.prefix = prefix
 	k.path = path
 	k.name = name
+	k.bstdout = bstdout
 	return k.init()
 }
 
@@ -48,7 +50,7 @@ func (k *KLog) init() (err error) {
 	if err != nil {
 		return err
 	}
-	if os.Stdout == nil {
+	if os.Stdout == nil || k.bstdout == false {
 		k.log = log.New(k.logFile, k.prefix, log.Ldate|log.Ltime)
 	} else {
 		k.wr = io.MultiWriter(os.Stdout, k.logFile)
