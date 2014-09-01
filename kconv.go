@@ -75,7 +75,7 @@ func ToInt8(val interface{}) (retVal int8, isOk bool) {
 	case float64:
 		retVal = int8(val.(float64))
 	case string:
-		i, err := strconv.ParseInt(val.(string), 10, 0)
+		i, err := strconv.ParseInt(val.(string), 10, 8)
 		//fmt.Println(b, err)
 		retVal = int8(i)
 		isOk = err == nil
@@ -118,7 +118,7 @@ func ToInt16(val interface{}) (retVal int16, isOk bool) {
 	case float64:
 		retVal = int16(val.(float64))
 	case string:
-		i, err := strconv.ParseInt(val.(string), 10, 0)
+		i, err := strconv.ParseInt(val.(string), 10, 16)
 		//fmt.Println(b, err)
 		retVal = int16(i)
 		isOk = err == nil
@@ -161,7 +161,7 @@ func ToInt32(val interface{}) (retVal int32, isOk bool) {
 	case float64:
 		retVal = int32(val.(float64))
 	case string:
-		i, err := strconv.ParseInt(val.(string), 10, 0)
+		i, err := strconv.ParseInt(val.(string), 10, 32)
 		//fmt.Println(b, err)
 		retVal = int32(i)
 		isOk = err == nil
@@ -204,7 +204,7 @@ func ToInt64(val interface{}) (retVal int64, isOk bool) {
 	case float64:
 		retVal = int64(val.(float64))
 	case string:
-		i, err := strconv.ParseInt(val.(string), 10, 0)
+		i, err := strconv.ParseInt(val.(string), 10, 64)
 		//fmt.Println(b, err)
 		retVal = int64(i)
 		isOk = err == nil
@@ -290,7 +290,7 @@ func ToUInt8(val interface{}) (retVal uint8, isOk bool) {
 	case float64:
 		retVal = uint8(val.(float64))
 	case string:
-		i, err := strconv.ParseInt(val.(string), 10, 0)
+		i, err := strconv.ParseInt(val.(string), 10, 8)
 		//fmt.Println(b, err)
 		retVal = uint8(i)
 		isOk = err == nil
@@ -333,7 +333,7 @@ func ToUInt16(val interface{}) (retVal uint16, isOk bool) {
 	case float64:
 		retVal = uint16(val.(float64))
 	case string:
-		i, err := strconv.ParseInt(val.(string), 10, 0)
+		i, err := strconv.ParseInt(val.(string), 10, 16)
 		//fmt.Println(b, err)
 		retVal = uint16(i)
 		isOk = err == nil
@@ -376,7 +376,7 @@ func ToUInt32(val interface{}) (retVal uint32, isOk bool) {
 	case float64:
 		retVal = uint32(val.(float64))
 	case string:
-		i, err := strconv.ParseInt(val.(string), 10, 0)
+		i, err := strconv.ParseInt(val.(string), 10, 32)
 		//fmt.Println(b, err)
 		retVal = uint32(i)
 		isOk = err == nil
@@ -419,7 +419,7 @@ func ToUInt64(val interface{}) (retVal uint64, isOk bool) {
 	case float64:
 		retVal = uint64(val.(float64))
 	case string:
-		i, err := strconv.ParseInt(val.(string), 10, 0)
+		i, err := strconv.ParseInt(val.(string), 10, 64)
 		//fmt.Println(b, err)
 		retVal = uint64(i)
 		isOk = err == nil
