@@ -95,6 +95,14 @@ func (k *KRbtree) add(val wrap_value) bool {
 	return true
 }
 
+func (k *KRbtree) RemoveFirst() interface{} {
+	if !k.isset {
+		return nil
+	}
+	val := k.removeFirst()
+	return val.Value()
+}
+
 func (k *KRbtree) removeFirst() wrap_value {
 	if k.left != nil {
 		value := k.left.removeFirst()
@@ -112,6 +120,27 @@ func (k *KRbtree) replaceWith(o *KRbtree) {
 	k.value = o.value
 	k.left = o.left
 	k.right = o.right
+}
+
+func (k *KRbtree) RemoveLast() interface{} {
+	if !k.isset {
+		return nil
+	}
+	val := k.removeLast()
+	return val.Value()
+}
+
+func (k *KRbtree) removeLast() wrap_value {
+	if k.right != nil {
+		value := k.right.removeLast()
+		if !k.right.isset {
+			k.right = nil
+		}
+		return value
+	}
+	value := k.value
+	k.remove(value)
+	return value
 }
 
 func (k *KRbtree) Remove(val interface{}) bool {
