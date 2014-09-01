@@ -164,6 +164,9 @@ func (k *KRbtree) Contains(val interface{}) bool {
 }
 
 func (k *KRbtree) contains(val wrap_value) bool {
+	if !k.isset {
+		return false
+	}
 	v := k.value.FunCompare(val)
 	if v == 0 {
 		return true
@@ -181,6 +184,9 @@ func (k *KRbtree) contains(val wrap_value) bool {
 }
 
 func (k *KRbtree) Find(val interface{}) interface{} {
+	if !k.isset {
+		return nil
+	}
 	return k.find(wrap(val))
 }
 
@@ -202,20 +208,54 @@ func (k *KRbtree) find(val wrap_value) interface{} {
 	return k.right.find(val)
 }
 
-func (k *KRbtree) Walk(fn func(interface{})) {
+func (k *KRbtree) First() interface{} {
+	if !k.isset {
+		return nil
+	}
 	if k.left != nil {
-		k.left.Walk(fn)
+		return k.left.First()
 	}
-	fn(k.value.Value())
+	return k.value.Value()
+}
+
+func (k *KRbtree) Last() interface{} {
+	if !k.isset {
+		return nil
+	}
 	if k.right != nil {
-		k.right.Walk(fn)
+		return k.right.Last()
 	}
+	return k.value.Value()
+}
+
+func (k *KRbtree) Walk(fn func(interface{}) bool) {
+	if k.isset {
+		k.walk(fn)
+	}
+}
+
+func (k *KRbtree) walk(fn func(interface{}) bool) bool {
+	if k.left != nil {
+		if !k.left.walk(fn) {
+			return false
+		}
+	}
+	if !fn(k.value.Value()) {
+		return false
+	}
+	if k.right != nil {
+		if !k.right.walk(fn) {
+			return false
+		}
+	}
+	return true
 }
 
 func (k *KRbtree) Length() int {
 	count := 0
-	k.Walk(func(v interface{}) {
+	k.Walk(func(v interface{}) bool {
 		count++
+		return true
 	})
 	return count
 }
@@ -227,9 +267,10 @@ func (k *KRbtree) ToSlice() []interface{} {
 
 	slice := make([]interface{}, k.Length())
 	i := 0
-	k.Walk(func(v interface{}) {
+	k.Walk(func(v interface{}) bool {
 		slice[i] = v
 		i++
+		return true
 	})
 	return slice
 }
