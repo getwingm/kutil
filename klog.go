@@ -21,11 +21,12 @@ type KLog struct {
 	bstdout bool
 }
 
-func (k *KLog) New(path string, name string, prefix string, bstdout bool) (err error) {
+func (k *KLog) Reset(path string, name string, prefix string, bstdout bool) (err error) {
 	k.prefix = prefix
 	k.path = path
 	k.name = name
 	k.bstdout = bstdout
+	k.day = ""
 	return k.init()
 }
 
