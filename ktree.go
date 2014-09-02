@@ -222,7 +222,7 @@ func (k *KRbtree) Find(val interface{}) interface{} {
 func (k *KRbtree) find(val wrap_value) interface{} {
 	v := k.value.FunCompare(val)
 	if v == 0 {
-		return k.value
+		return k.value.Value()
 	}
 	if v > 0 {
 		if k.left == nil {
