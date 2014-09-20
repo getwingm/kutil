@@ -48,8 +48,12 @@ func (k *KLog) init() (err error) {
 	if err != nil {
 		return err
 	}
-	k.wr = io.MultiWriter(os.Stdout, k.logFile)
-	k.log = log.New(k.wr, k.prefix, log.Ldate|log.Ltime)
+	if os.Stdout == nil {
+		k.log = log.New(k.logFile, k.prefix, log.Ldate|log.Ltime)
+	} else {
+		k.wr = io.MultiWriter(os.Stdout, k.logFile)
+		k.log = log.New(k.wr, k.prefix, log.Ldate|log.Ltime)
+	}
 	k.day = day
 	return nil
 }
